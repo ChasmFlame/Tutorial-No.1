@@ -6,14 +6,26 @@ namespace Space_Game
 {
     public class Agent
     {
-        int HitPoints, CurrentHitpoints;
-        int ShootingSkillLevel;
-        float X, Y;
+        public int HitPoints, CurrentHitpoints;
+        public int ShootingSkillLevel;
+        public float X, Y;
+        public string Weapon;
+        public int direction;
+        private int v1;
+        private int v2;
+
         public Agent()
         {
             HitPoints = 25;
             CurrentHitpoints = HitPoints;
             ShootingSkillLevel = 50;
+            Weapon = "Laser Pistol";
+        }
+
+        public Agent(int X, int Y):this()
+        { 
+            this.X = X;
+            this.Y = Y;
         }
 
         public bool UseWeapon()

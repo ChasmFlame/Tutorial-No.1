@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 
@@ -7,35 +9,24 @@ namespace Space_Game
 {
 	class MainVM : BaseClass
 	{
-		#region declarations
-		#endregion
-
 		#region fields
-		int [] DiceResult;
-		string shootResult;
+		
 		#endregion
 
 		#region properties
-		public string Result
+		public World World
+		{
+			get;set;
+		}
+		public ObservableCollection<string> TextLines
         {
-            get {
-				string Output = "You Rolled ";
-				for (int iterator = 0; iterator < DiceResult.Length; iterator++)
-				{
-					Output += DiceResult[iterator];
-					if (iterator == DiceResult.Length - 1)
-						Output += ".";
-					else Output += ", ";
-				}
-				return Output;
-			}
+            get {				return new  ObservableCollection<string>( World.TextLines);			}
         }
-		public string ShootResult
+		public String Message
 		{
 			get
 			{
-				string Output = string.Format ("Ben shoots and {0}", shootResult);
-				return Output;
+				return World.Message;
 			}
 		}
 		#endregion
@@ -43,25 +34,18 @@ namespace Space_Game
 		#region methods
 		public MainVM ()
         {
-			DiceResult = new int[3];
-			DiceResult[0] = 0;
-			DiceResult[1] = 0;
-			DiceResult[2] = 0;
+			World = new World();
+			World.PropertyChanged += UpdateProperties;
 		}
 
-		internal void RollDice(int v1, int v2)
+		private void UpdateProperties(object sender, PropertyChangedEventArgs e)
 		{
-			DiceResult = DiceController.Roll(v1, v2);
-			NotifyPropertyChanged(nameof (Result));
+			NotifyPropertyChanged(e.PropertyName);
 		}
 
 		internal void ShootWeapon()
 		{
-			Agent Ben = new Agent();
-			bool Result = Ben.UseWeapon();
-			if (Result) shootResult = "hits";
-			else shootResult = "misses";
-			NotifyPropertyChanged(nameof(ShootResult));
+			World.ShootWeapon();
 		}
 		#endregion
 	}

@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Windows.Media;
 
 namespace Space_Game
 {
-    class World
+    class AI : Agent
     {
-        int [,] Tile;
-        World ()
+
+        public AI(int X, int Y)
         {
-            Tile = new int[10,10];
+            this.X = X;
+            this.Y = Y;
         }
     }
 }

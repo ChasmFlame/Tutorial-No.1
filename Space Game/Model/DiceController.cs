@@ -18,6 +18,5 @@ namespace Space_Game
                 }
             return Result;
         }
-
     }
 }
