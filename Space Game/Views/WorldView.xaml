@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Space_Game"
         mc:Ignorable="d"
-        Height="452" Width="452" Loaded="UserControl_Loaded">
+        Height="452" Width="452" Loaded="UserControl_Loaded" MouseUp="Map_MouseUp">
 	<Canvas x:Name="Map"/>
 
 

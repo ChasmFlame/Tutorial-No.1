@@ -20,7 +20,7 @@ namespace Space_Game
 		}
 		public ObservableCollection<string> TextLines
         {
-            get {				return new  ObservableCollection<string>( World.TextLines);			}
+            get {return new  ObservableCollection<string>( World.TextLines);			}
         }
 		public String Message
 		{

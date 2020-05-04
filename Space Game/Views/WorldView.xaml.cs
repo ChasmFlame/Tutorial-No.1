@@ -42,5 +42,10 @@ namespace Space_Game
 		{
 			InvalidateVisual();
 		}
+
+		private void Map_MouseUp(object sender, MouseButtonEventArgs e)
+		{
+			((World)DataContext)?.MouseClick(e.GetPosition(this).X, e.GetPosition(this).Y);
+		}
 	}
 }

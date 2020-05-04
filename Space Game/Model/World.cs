@@ -3,19 +3,22 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-
 
 namespace Space_Game
 {
 	public class World : BaseClass
 	{
+		// constants
+		const int TileSize = 50;
+		const int ViewSize = 450;
+
 		#region Resources
 		BitmapImage FloorImage = new BitmapImage(new Uri("Resources/Images/Floor.png", UriKind.Relative));
 		BitmapImage CoverImage = new BitmapImage(new Uri("Resources/Images/Cover.png", UriKind.Relative));
 		BitmapImage DirectionIndicator = new BitmapImage(new Uri("Resources/Images/DI.png", UriKind.Relative));
-		BitmapImage SoldierImage = new BitmapImage(new Uri("Resources/Images/Soldier.png", UriKind.Relative));
 		#endregion
 
 		#region Fields
@@ -24,6 +27,10 @@ namespace Space_Game
 		private string message;
 		private double direction;
 		List<Agent> agents;
+		int MouseX;
+		int MouseY;
+		Brush SelectionBrush;
+		Agent SelectedAgent;
 		#endregion
 
 		#region Properties
@@ -39,7 +46,22 @@ namespace Space_Game
 				NotifyPropertyChanged();
 			}	
 		}
-		public string Message
+
+        internal void MouseClick(double x, double y)
+        {
+			MouseX = (int) x / 50;
+			MouseY = (int) y / 50;
+			SelectedAgent = null;
+			foreach (Agent agent in agents)
+			{
+				if (agent.TestLocation(MouseX, MouseY))
+				{
+					SelectedAgent = agent;
+				}
+			}
+		}
+
+        public string Message
 		{
 			get
 			{
@@ -55,6 +77,8 @@ namespace Space_Game
 
 		public World()
 		{
+			SelectionBrush = new SolidColorBrush(Color.FromArgb(128, 255, 0, 0));
+			SelectedAgent = null;
 			agents = new List<Agent>();
 			TextLines = new ObservableCollection<string>();
 			Tile = new int[10, 10]
@@ -72,7 +96,7 @@ namespace Space_Game
 
 			Message = "Ready!";
 			agents.Add(new Player("Ben", 1, 1));
-			agents.Add(new AI(9, 9));
+			agents.Add(new AI(8, 8));
 		}
 
 		internal void ShootWeapon()
@@ -95,36 +119,33 @@ namespace Space_Game
 		public void Render(DrawingContext dc)
 		{
 			direction += 5;
-			dc.DrawRectangle(Brushes.Black, null, new Rect(0, 0, 450, 450));
+			dc.DrawRectangle(Brushes.Black, null, new Rect(0, 0, ViewSize, ViewSize));
 			for(int x = 0; x < 9; x++)
 				for(int y = 0; y < 9; y++)
 				{
-					int xpos = 50 * x;
-					int ypos = 50 * y;
+					int xpos = TileSize * x;
+					int ypos = TileSize * y;
 					switch(Tile[x, y])
 					{
 						case 1:
-						dc.DrawImage(FloorImage, new Rect(xpos, ypos, 50, 50)) ;
+						dc.DrawImage(FloorImage, new Rect(xpos, ypos, TileSize, TileSize)) ;
 							break;
 						case 2:
-							dc.DrawImage(CoverImage, new Rect(xpos, ypos, 50, 50));
+							dc.DrawImage(CoverImage, new Rect(xpos, ypos, TileSize, TileSize));
 							break;
 					}
 				}
+			if (SelectedAgent != null)
+				dc.DrawRectangle(SelectionBrush, null, new Rect(SelectedAgent.X*TileSize, SelectedAgent.Y*TileSize, TileSize, TileSize));
+
 			foreach (Agent agent in agents)
 			{
-				float X = agent.X * 50 +25;
-				float Y = agent.Y * 50 +25;
-				dc.PushTransform(new TranslateTransform(X, Y));
-				dc.PushTransform(new RotateTransform(agent.direction));
-				dc.DrawImage(SoldierImage, new Rect(-25, -25, 50, 50));
-				dc.Pop();
-				dc.Pop();
+				agent.Render(dc);
 			}
 
-			dc.PushTransform(new TranslateTransform(225, 225)); 
+			dc.PushTransform(new TranslateTransform(ViewSize/2, ViewSize/2)); 
 			dc.PushTransform(new RotateTransform(direction));
-			dc.DrawImage(DirectionIndicator, new Rect(-25, -25, 50, 50));
+			dc.DrawImage(DirectionIndicator, new Rect(-TileSize/2, -TileSize/2, TileSize, TileSize));
 			dc.Pop();
 			dc.Pop();
 		}

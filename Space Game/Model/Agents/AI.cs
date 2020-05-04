@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Windows.Media.Imaging;
 
 namespace Space_Game
 {
@@ -11,6 +12,7 @@ namespace Space_Game
         {
             this.X = X;
             this.Y = Y;
+            SoldierImage = new BitmapImage(new Uri("Resources/Images/Enemy.png", UriKind.Relative));
         }
     }
 }
