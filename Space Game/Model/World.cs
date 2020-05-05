@@ -31,6 +31,7 @@ namespace Space_Game
 		int MouseY;
 		Brush SelectionBrush;
 		Agent SelectedAgent;
+		TurnManager TurnManager;
 		#endregion
 
 		#region Properties
@@ -73,6 +74,8 @@ namespace Space_Game
 				NotifyPropertyChanged();
 			}		
 		}
+
+		public Agent SelectedAgent1 { get => SelectedAgent; set => SelectedAgent = value; }
 		#endregion
 
 		public World()
@@ -97,6 +100,7 @@ namespace Space_Game
 			Message = "Ready!";
 			agents.Add(new Player("Ben", 1, 1));
 			agents.Add(new AI(8, 8));
+			TurnManager = new TurnManager();
 		}
 
 		internal void ShootWeapon()
@@ -118,7 +122,7 @@ namespace Space_Game
 
 		public void Render(DrawingContext dc)
 		{
-			direction += 5;
+			RunLogic();
 			dc.DrawRectangle(Brushes.Black, null, new Rect(0, 0, ViewSize, ViewSize));
 			for(int x = 0; x < 9; x++)
 				for(int y = 0; y < 9; y++)
@@ -148,6 +152,13 @@ namespace Space_Game
 			dc.DrawImage(DirectionIndicator, new Rect(-TileSize/2, -TileSize/2, TileSize, TileSize));
 			dc.Pop();
 			dc.Pop();
+		}
+
+		private void RunLogic()
+		{
+			direction += 5;
+			TurnManager.CheckStateChanges(this);
+			Message = TurnManager.GetStateMessage();
 		}
 	}
 }
