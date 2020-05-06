@@ -54,5 +54,10 @@ namespace Space_Game
 				}
 			}
 		}
+
+		private void Button_Move_Click(object sender, RoutedEventArgs e)
+		{
+			vm.MoveAgent();
+		}
 	}
 }

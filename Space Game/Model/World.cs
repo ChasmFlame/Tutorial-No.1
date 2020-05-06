@@ -23,6 +23,7 @@ namespace Space_Game
 
 		#region Fields
 		int[,] Tile;
+		int tileX, tileY;
 		ObservableCollection<string> textLines;
 		private string message;
 		private double direction;
@@ -30,7 +31,14 @@ namespace Space_Game
 		int MouseX;
 		int MouseY;
 		Brush SelectionBrush;
-		Agent SelectedAgent;
+		Brush SelectedAgentBrush;
+
+		internal void MoveAgent()
+		{
+			SelectedAgent?.Move(tileX, tileY);
+		}
+
+		Agent selectedAgent;
 		TurnManager TurnManager;
 		#endregion
 
@@ -48,20 +56,6 @@ namespace Space_Game
 			}	
 		}
 
-        internal void MouseClick(double x, double y)
-        {
-			MouseX = (int) x / 50;
-			MouseY = (int) y / 50;
-			SelectedAgent = null;
-			foreach (Agent agent in agents)
-			{
-				if (agent.TestLocation(MouseX, MouseY))
-				{
-					SelectedAgent = agent;
-				}
-			}
-		}
-
         public string Message
 		{
 			get
@@ -75,12 +69,13 @@ namespace Space_Game
 			}		
 		}
 
-		public Agent SelectedAgent1 { get => SelectedAgent; set => SelectedAgent = value; }
+		public Agent SelectedAgent { get => selectedAgent; set => selectedAgent = value; }
 		#endregion
 
 		public World()
 		{
-			SelectionBrush = new SolidColorBrush(Color.FromArgb(128, 255, 0, 0));
+			SelectionBrush = new SolidColorBrush(Color.FromArgb(128, 0, 0, 255));
+			SelectedAgentBrush = new SolidColorBrush(Color.FromArgb(128, 255, 0, 0));
 			SelectedAgent = null;
 			agents = new List<Agent>();
 			TextLines = new ObservableCollection<string>();
@@ -101,17 +96,8 @@ namespace Space_Game
 			agents.Add(new Player("Ben", 1, 1));
 			agents.Add(new AI(8, 8));
 			TurnManager = new TurnManager();
-		}
-
-		internal void ShootWeapon()
-		{
-			Player player = (Player)agents[0];
-			string shootResult;
-			if(agents[0].UseWeapon())
-				shootResult = "hits";
-			else
-				shootResult = "misses";
-			AddTextLine(String.Format("{0} shoots his {2} and {1}!", player.Name, shootResult, player.Weapon));
+			tileX = -1;
+			tileY = -1;
 		}
 
 		private void AddTextLine(string text)
@@ -140,7 +126,9 @@ namespace Space_Game
 					}
 				}
 			if (SelectedAgent != null)
-				dc.DrawRectangle(SelectionBrush, null, new Rect(SelectedAgent.X*TileSize, SelectedAgent.Y*TileSize, TileSize, TileSize));
+				dc.DrawRectangle(SelectedAgentBrush, null, new Rect(SelectedAgent.X*TileSize, SelectedAgent.Y*TileSize, TileSize, TileSize));
+
+			dc.DrawRectangle(SelectionBrush, null, new Rect(tileX * TileSize, tileY * TileSize, TileSize, TileSize));
 
 			foreach (Agent agent in agents)
 			{
@@ -156,9 +144,56 @@ namespace Space_Game
 
 		private void RunLogic()
 		{
-			direction += 5;
+			Move();
 			TurnManager.CheckStateChanges(this);
 			Message = TurnManager.GetStateMessage();
+		}
+
+		public void Move()
+		{
+			foreach (Agent agent in agents)
+			{
+				agent.HeadToDestination();
+			}
+		}
+
+		public void MouseClick(double x, double y)
+		{
+			MouseX = (int)x / 50;
+			MouseY = (int)y / 50;
+			if (Tile [MouseX, MouseY] == 1)
+				{ 
+				tileX = MouseX;
+				tileY = MouseY;
+			}
+			foreach(Agent agent in agents)
+			{
+				if(agent.TestLocation(MouseX, MouseY))
+				{
+					selectedAgent = agent;
+				}
+			}
+		}
+
+		public bool MovementComplete()
+		{
+			bool AllMoved = true;
+			foreach(Agent agent in agents)
+			{
+				if(!agent.Finished()) AllMoved = false;
+			}
+			return AllMoved;
+		}
+
+		public void ShootWeapon()
+		{
+			Player player = (Player)agents[0];
+			string shootResult;
+			if(agents[0].UseWeapon())
+				shootResult = "hits";
+			else
+				shootResult = "misses";
+			AddTextLine(String.Format("{0} shoots his {2} and {1}!", player.Name, shootResult, player.Weapon));
 		}
 	}
 }

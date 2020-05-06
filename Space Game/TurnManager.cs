@@ -13,7 +13,8 @@ namespace Space_Game
         }
         public enum SubState
         {
-            MOVEMENT_SELECTAGENT, MOVEMENT_SELECTDESTINATION
+            MOVEMENT_SELECTAGENT, MOVEMENT_SELECTDESTINATION, MOVEMENT_FINISHED,
+                ACTION_SPENDPOINTS, ACTION_FINISHED
         }
 
         #region Fields
@@ -27,11 +28,7 @@ namespace Space_Game
             CurrentSubState = SubState.MOVEMENT_SELECTAGENT;
         }
 
-        public SubState Advance()
-        {
-            CurrentSubState = CurrentSubState++;
-            return CurrentSubState;
-        }
+        
 
         public SubState GetSubState()
         {
@@ -56,12 +53,25 @@ namespace Space_Game
             switch (CurrentSubState)
             {
                 case SubState.MOVEMENT_SELECTAGENT:
-                    if (world.SelectedAgent1 != null) Advance();
+                    if (world.SelectedAgent != null) CurrentSubState = SubState.MOVEMENT_SELECTDESTINATION;
                     break;
                 case SubState.MOVEMENT_SELECTDESTINATION:
                     break;
                 default:
                     break;
+            }
+            switch (CurrentState)
+            {
+                case State.MOVEMENT:
+					if(world.MovementComplete())
+                    {
+                        CurrentState = State.ACTION;
+                        CurrentSubState = SubState.ACTION_SPENDPOINTS;
+					}
+                    break;
+                case State.ACTION:
+                    break;
+
             }
         }
     }

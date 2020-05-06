@@ -10,7 +10,8 @@
 		<local:WorldView DataContext="{Binding World}" DockPanel.Dock="Left" Width="450"/>
 		<StackPanel DockPanel.Dock="Top">
 			<Button Content="Shoot" Click="Button_Shoot_Click"/>
-		</StackPanel>
+            <Button Content="Move" Click="Button_Move_Click"/>
+        </StackPanel>
 		<Label Content="{Binding Message}" DockPanel.Dock="Top" Height="50"
 			   VerticalAlignment="Center" HorizontalAlignment="Center"
 			   HorizontalContentAlignment="Center"

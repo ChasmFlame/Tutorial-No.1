@@ -47,6 +47,11 @@ namespace Space_Game
 		{
 			World.ShootWeapon();
 		}
-		#endregion
-	}
+
+        internal void MoveAgent()
+        {
+            World.MoveAgent();
+        }
+        #endregion
+    }
 }
