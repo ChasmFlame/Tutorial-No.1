@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Space_Game.Model;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows;
@@ -68,9 +69,11 @@ namespace Space_Game
             dc.Pop();
         }
 
+
+
         public bool TestLocation(int mouseX, int mouseY)
         {
-            return mouseX == X && mouseY == Y;
+            return Utilities.approxequals (mouseX , X) && Utilities.approxequals (mouseY , Y);
         }
 
         public bool Finished()

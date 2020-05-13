@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Windows;
 using System.Windows.Input;
@@ -14,6 +15,8 @@ namespace Space_Game
 		// constants
 		const int TileSize = 50;
 		const int ViewSize = 450;
+
+		const int floor = 0;
 
 		#region Resources
 		BitmapImage FloorImage = new BitmapImage(new Uri("Resources/Images/Floor.png", UriKind.Relative));
@@ -33,10 +36,6 @@ namespace Space_Game
 		Brush SelectionBrush;
 		Brush SelectedAgentBrush;
 
-		internal void MoveAgent()
-		{
-			SelectedAgent?.Move(tileX, tileY);
-		}
 
 		Agent selectedAgent;
 		TurnManager TurnManager;
@@ -80,16 +79,16 @@ namespace Space_Game
 			agents = new List<Agent>();
 			TextLines = new ObservableCollection<string>();
 			Tile = new int[10, 10]
-			   {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-				{0, 1, 1, 1, 1, 1, 1, 1, 1, 0 }, 
-				{0, 1, 1, 1, 1, 1, 1, 1, 1, 0 }, 
-				{0, 1, 1, 1, 2, 1, 1, 1, 1, 0 }, 
-				{0, 1, 1, 1, 1, 1, 2, 1, 1, 0 }, 
-				{0, 1, 1, 1, 1, 1, 1, 1, 1, 0 }, 
-				{0, 1, 1, 1, 2, 1, 1, 1, 1, 0 }, 
-				{0, 1, 1, 1, 1, 1, 1, 1, 1, 0 }, 
-				{0, 1, 1, 1, 1, 1, 1, 1, 1, 0 }, 
-				{0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 
+			   {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+				{1, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, 
+				{1, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, 
+				{1, 0, 0, 0, 2, 0, 0, 0, 0, 1 }, 
+				{1, 0, 0, 0, 1, 0, 2, 0, 0, 1 }, 
+				{1, 0, 0, 0, 1, 0, 0, 0, 0, 1 }, 
+				{1, 0, 0, 0, 2, 2, 1, 0, 0, 1 }, 
+				{1, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, 
+				{1, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, 
+				{1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 
 				};
 
 			Message = "Ready!";
@@ -98,6 +97,43 @@ namespace Space_Game
 			TurnManager = new TurnManager();
 			tileX = -1;
 			tileY = -1;
+		}
+
+		internal void MoveAgent()
+		{
+			if (tileX == -1 || tileY == -1) return;
+			SelectedAgent?.Move(tileX, tileY);
+			tileX = tileY = -1;
+		}
+
+		public bool checklineofsight (float startx, float starty, float endx, float endy)
+		{
+			float xlength, ylength, xdelta, ydelta, length;
+			bool CanSee = true;
+			xlength = endx - startx;
+			ylength = endy - starty;
+			startx += 0.5f;
+			starty += 0.5f;
+			if (xlength > ylength)
+			{
+				length = xlength;
+				xdelta = 1;
+				ydelta = ylength / xlength;
+				ydelta = Math.Sign(ylength) * ydelta;
+			}
+			else
+			{
+				length = ylength;
+				ydelta = 1;
+				xdelta = xlength / ylength;
+				xdelta = Math.Sign(xlength) * xdelta;
+			}
+			for (float iterator = 1; iterator < length; iterator++)
+			{
+				if (Tile [(int) (startx + xdelta*iterator) , (int) (starty + ydelta * iterator)] > 0) CanSee = false;
+			}
+
+			return CanSee;
 		}
 
 		private void AddTextLine(string text)
@@ -117,7 +153,7 @@ namespace Space_Game
 					int ypos = TileSize * y;
 					switch(Tile[x, y])
 					{
-						case 1:
+						case 0:
 						dc.DrawImage(FloorImage, new Rect(xpos, ypos, TileSize, TileSize)) ;
 							break;
 						case 2:
@@ -161,7 +197,7 @@ namespace Space_Game
 		{
 			MouseX = (int)x / 50;
 			MouseY = (int)y / 50;
-			if (Tile [MouseX, MouseY] == 1)
+			if (Tile [MouseX, MouseY] == 0 && selectedAgent != null && checklineofsight (selectedAgent.X , selectedAgent.Y, MouseX , MouseY ) )
 				{ 
 				tileX = MouseX;
 				tileY = MouseY;
