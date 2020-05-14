@@ -16,7 +16,7 @@ namespace Space_Game
         public int destinationX, destinationY;
         public string Weapon;
         public int direction;
-        private bool finished;
+        private bool movementcompleted;
         public int actionPoints;
         public int movementPoints;
 
@@ -69,16 +69,35 @@ namespace Space_Game
             dc.Pop();
         }
 
-
-
-        public bool TestLocation(int mouseX, int mouseY)
+        public bool CheckLineOfSight(int[,] map, float endx, float endy)
         {
-            return Utilities.approxequals (mouseX , X) && Utilities.approxequals (mouseY , Y);
-        }
+            float xlength, ylength, xdelta, ydelta, length;
+            bool CanSee = true;
+			float startx = X, starty = Y;
+            xlength = endx - startx;
+            ylength = endy - starty;
+            startx += 0.5f;
+            starty += 0.5f;
+            if (xlength > ylength)
+            {
+                length = xlength;
+                xdelta = 1;
+                ydelta = ylength / xlength;
+                ydelta = Math.Sign(ylength) * ydelta;
+            }
+            else
+            {
+                length = ylength;
+                ydelta = 1;
+                xdelta = xlength / ylength;
+                xdelta = Math.Sign(xlength) * xdelta;
+            }
+            for (float iterator = 1; iterator < length; iterator++)
+            {
+                if (map[(int)(startx + xdelta * iterator), (int)(starty + ydelta * iterator)] > 0) CanSee = false;
+            }
 
-        public bool Finished()
-        {
-            return finished;
+            return CanSee;
         }
 
         internal void HeadToDestination()
@@ -88,5 +107,16 @@ namespace Space_Game
             if (Y < destinationY) Y += 0.1f;
             if (Y > destinationY) Y -= 0.1f;
         }
+
+        public bool TestLocation(int mouseX, int mouseY)
+        {
+            return Utilities.approxequals (mouseX , X) && Utilities.approxequals (mouseY , Y);
+        }
+
+        public bool HasMovementCompleted()
+        {
+            return movementcompleted;
+        }
+
     }
 }

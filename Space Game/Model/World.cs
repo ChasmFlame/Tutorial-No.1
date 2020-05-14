@@ -15,7 +15,6 @@ namespace Space_Game
 		// constants
 		const int TileSize = 50;
 		const int ViewSize = 450;
-
 		const int floor = 0;
 
 		#region Resources
@@ -106,36 +105,6 @@ namespace Space_Game
 			tileX = tileY = -1;
 		}
 
-		public bool checklineofsight (float startx, float starty, float endx, float endy)
-		{
-			float xlength, ylength, xdelta, ydelta, length;
-			bool CanSee = true;
-			xlength = endx - startx;
-			ylength = endy - starty;
-			startx += 0.5f;
-			starty += 0.5f;
-			if (xlength > ylength)
-			{
-				length = xlength;
-				xdelta = 1;
-				ydelta = ylength / xlength;
-				ydelta = Math.Sign(ylength) * ydelta;
-			}
-			else
-			{
-				length = ylength;
-				ydelta = 1;
-				xdelta = xlength / ylength;
-				xdelta = Math.Sign(xlength) * xdelta;
-			}
-			for (float iterator = 1; iterator < length; iterator++)
-			{
-				if (Tile [(int) (startx + xdelta*iterator) , (int) (starty + ydelta * iterator)] > 0) CanSee = false;
-			}
-
-			return CanSee;
-		}
-
 		private void AddTextLine(string text)
 		{
 			TextLines.Add(text);
@@ -197,7 +166,7 @@ namespace Space_Game
 		{
 			MouseX = (int)x / 50;
 			MouseY = (int)y / 50;
-			if (Tile [MouseX, MouseY] == 0 && selectedAgent != null && checklineofsight (selectedAgent.X , selectedAgent.Y, MouseX , MouseY ) )
+			if(Tile[MouseX, MouseY] == 0 && selectedAgent != null && selectedAgent.CheckLineOfSight (Tile, MouseX , MouseY ) )
 				{ 
 				tileX = MouseX;
 				tileY = MouseY;
@@ -216,20 +185,10 @@ namespace Space_Game
 			bool AllMoved = true;
 			foreach(Agent agent in agents)
 			{
-				if(!agent.Finished()) AllMoved = false;
+				if(!agent.HasMovementCompleted()) AllMoved = false;
 			}
 			return AllMoved;
 		}
 
-		public void ShootWeapon()
-		{
-			Player player = (Player)agents[0];
-			string shootResult;
-			if(agents[0].UseWeapon())
-				shootResult = "hits";
-			else
-				shootResult = "misses";
-			AddTextLine(String.Format("{0} shoots his {2} and {1}!", player.Name, shootResult, player.Weapon));
-		}
 	}
 }
