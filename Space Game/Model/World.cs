@@ -98,19 +98,6 @@ namespace Space_Game
 			tileY = -1;
 		}
 
-		internal void MoveAgent()
-		{
-			if (tileX == -1 || tileY == -1) return;
-			SelectedAgent?.Move(tileX, tileY);
-			tileX = tileY = -1;
-		}
-
-		private void AddTextLine(string text)
-		{
-			TextLines.Add(text);
-			NotifyPropertyChanged(nameof(TextLines));
-		}
-
 		public void Render(DrawingContext dc)
 		{
 			RunLogic();
@@ -123,30 +110,64 @@ namespace Space_Game
 					switch(Tile[x, y])
 					{
 						case 0:
-						dc.DrawImage(FloorImage, new Rect(xpos, ypos, TileSize, TileSize)) ;
+							dc.DrawImage(FloorImage, new Rect(xpos, ypos, TileSize, TileSize));
 							break;
 						case 2:
 							dc.DrawImage(CoverImage, new Rect(xpos, ypos, TileSize, TileSize));
 							break;
 					}
 				}
-			if (SelectedAgent != null)
-				dc.DrawRectangle(SelectedAgentBrush, null, new Rect(SelectedAgent.X*TileSize, SelectedAgent.Y*TileSize, TileSize, TileSize));
+			if(SelectedAgent != null)
+				DrawHighlight(dc, SelectedAgentBrush, new Point(SelectedAgent.X, SelectedAgent.Y), .8f);
 
-			dc.DrawRectangle(SelectionBrush, null, new Rect(tileX * TileSize, tileY * TileSize, TileSize, TileSize));
+			DrawHighlight(dc, SelectionBrush, new Point(tileX, tileY), .4f);
 
-			foreach (Agent agent in agents)
+			foreach(Agent agent in agents)
 			{
 				agent.Render(dc);
 			}
 
-			dc.PushTransform(new TranslateTransform(ViewSize/2, ViewSize/2)); 
+			dc.PushTransform(new TranslateTransform(ViewSize / 2, ViewSize / 2));
 			dc.PushTransform(new RotateTransform(direction));
-			dc.DrawImage(DirectionIndicator, new Rect(-TileSize/2, -TileSize/2, TileSize, TileSize));
+			dc.DrawImage(DirectionIndicator, new Rect(-TileSize / 2, -TileSize / 2, TileSize, TileSize));
 			dc.Pop();
 			dc.Pop();
 		}
 
+		#region Input Control
+		public void MouseClick(double x, double y)
+		{
+			MouseX = (int)x / 50;
+			MouseY = (int)y / 50;
+			if(Tile[MouseX, MouseY] == 0 
+				&& selectedAgent != null 
+				&& selectedAgent.CheckLineOfSight(Tile, MouseX, MouseY) == Model.Visibility.CLEAR)
+			{
+				tileX = MouseX;
+				tileY = MouseY;
+			}
+			foreach(Agent agent in agents)
+			{
+				if(agent.TestLocation(MouseX, MouseY))
+				{
+					selectedAgent = agent;
+				}
+			}
+		}
+
+		public void MoveOption()
+		{
+			if(tileX == -1 || tileY == -1) return;
+			SelectedAgent?.Move(tileX, tileY);
+			tileX = tileY = -1;
+		}
+
+		public void UseWeaponOption()
+		{
+		}
+		#endregion
+
+		#region Game Logic
 		private void RunLogic()
 		{
 			Move();
@@ -162,24 +183,6 @@ namespace Space_Game
 			}
 		}
 
-		public void MouseClick(double x, double y)
-		{
-			MouseX = (int)x / 50;
-			MouseY = (int)y / 50;
-			if(Tile[MouseX, MouseY] == 0 && selectedAgent != null && selectedAgent.CheckLineOfSight (Tile, MouseX , MouseY ) )
-				{ 
-				tileX = MouseX;
-				tileY = MouseY;
-			}
-			foreach(Agent agent in agents)
-			{
-				if(agent.TestLocation(MouseX, MouseY))
-				{
-					selectedAgent = agent;
-				}
-			}
-		}
-
 		public bool MovementComplete()
 		{
 			bool AllMoved = true;
@@ -189,6 +192,20 @@ namespace Space_Game
 			}
 			return AllMoved;
 		}
+		#endregion
 
+		#region Utility 
+		private void AddTextLine(string text)
+		{
+			TextLines.Add(text);
+			NotifyPropertyChanged(nameof(TextLines));
+		}
+
+		private void DrawHighlight(DrawingContext dc, Brush brush, Point point, float size)
+		{
+			size = size * (float)TileSize/2;
+			dc.DrawEllipse(brush, null, new Point((point.X + 0.5f) * TileSize, (point.Y + 0.5f) * TileSize), size, size);
+		}
+		#endregion
 	}
 }

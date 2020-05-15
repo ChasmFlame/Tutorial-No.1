@@ -43,14 +43,14 @@ namespace Space_Game
 			NotifyPropertyChanged(e.PropertyName);
 		}
 
-		internal void ShootWeapon()
+		internal void UseWeapon()
 		{
-			World.ShootWeapon();
+			World.UseWeaponOption();
 		}
 
         internal void MoveAgent()
         {
-            World.MoveAgent();
+            World.MoveOption();
         }
         #endregion
     }

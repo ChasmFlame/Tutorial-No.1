@@ -26,13 +26,11 @@ namespace Space_Game
 		{
 			InitializeComponent();
 			DataContext = vm;
-
-		
 		}
 
 		private void Button_Shoot_Click(object sender, RoutedEventArgs e)
 		{
-			vm.ShootWeapon();
+			vm.UseWeapon();
 		}
 
 		private void Window_KeyDown(object sender, KeyEventArgs e)

@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Visibility = Space_Game.Model.Visibility;
 
 namespace Space_Game
 {
@@ -69,10 +70,10 @@ namespace Space_Game
             dc.Pop();
         }
 
-        public bool CheckLineOfSight(int[,] map, float endx, float endy)
+        public Visibility CheckLineOfSight(int[,] map, float endx, float endy)
         {
+            Visibility visibility = Visibility.CLEAR;
             float xlength, ylength, xdelta, ydelta, length;
-            bool CanSee = true;
 			float startx = X, starty = Y;
             xlength = endx - startx;
             ylength = endy - starty;
@@ -80,28 +81,38 @@ namespace Space_Game
             starty += 0.5f;
             if (xlength > ylength)
             {
-                length = xlength;
-                xdelta = 1;
+                length = Math.Abs(xlength);
+                xdelta = 1 * Math.Sign(xlength); // had to chand this delta sign to look left
                 ydelta = ylength / xlength;
                 ydelta = Math.Sign(ylength) * ydelta;
             }
             else
             {
-                length = ylength;
-                ydelta = 1;
+                length = Math.Abs(ylength);
+                ydelta = 1*Math.Sign(ylength); // had to chand this delta sign to look up
                 xdelta = xlength / ylength;
                 xdelta = Math.Sign(xlength) * xdelta;
             }
             for (float iterator = 1; iterator < length; iterator++)
             {
-                if (map[(int)(startx + xdelta * iterator), (int)(starty + ydelta * iterator)] > 0) CanSee = false;
+                if(map[(int)Math.Round(startx + xdelta * iterator), (int)Math.Round(starty + ydelta * iterator)] == 1)
+                {
+                    visibility = Visibility.HIDDEN;
+                    break;
+                }
+                if(map[(int)Math.Round(startx + xdelta * iterator), (int)Math.Round(starty + ydelta * iterator)] > 2)
+                {
+                    visibility = Visibility.OBSCURED;
+                    break;
+                }
             }
 
-            return CanSee;
+            return visibility;
         }
 
         internal void HeadToDestination()
         {
+            // lets change the movement to be more direct and less janky.
             if (X < destinationX) X += 0.1f;
             if (X > destinationX) X -= 0.1f;
             if (Y < destinationY) Y += 0.1f;
@@ -110,7 +121,7 @@ namespace Space_Game
 
         public bool TestLocation(int mouseX, int mouseY)
         {
-            return Utilities.approxequals (mouseX , X) && Utilities.approxequals (mouseY , Y);
+            return Utilities.ApproxEqual (mouseX , X) && Utilities.ApproxEqual (mouseY , Y);
         }
 
         public bool HasMovementCompleted()
